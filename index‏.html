@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>مغامرة الحروف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-top:#EAF6FF;
+    --bg-bottom:#FFF6E2;
+    --coral:#FF6F59;
+    --sun:#FFB627;
+    --leaf:#4CB963;
+    --sky:#2FA3C7;
+    --grape:#9B59B6;
+    --melon:#FF6F91;
+    --ink:#2B2B3A;
+    --ink-soft:#6b6b7d;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    min-height:100vh;
+    background:linear-gradient(180deg,var(--bg-top) 0%, var(--bg-bottom) 100%);
+    font-family:'Cairo',sans-serif;
+    color:var(--ink);
+    direction:rtl;
+    overflow-x:hidden;
+    padding-bottom:32px;
+  }
+  .display{font-family:'Lalezar',cursive;}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:22px 18px 14px;
+    text-align:center;
+    position:relative;
+  }
+  .mascot{
+    font-size:2.4rem;
+    display:inline-block;
+    animation:bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob{
+    0%,100%{transform:translateY(0) rotate(-4deg);}
+    50%{transform:translateY(-8px) rotate(4deg);}
+  }
+  h1.display{
+    font-size:2.3rem;
+    margin:4px 0 2px;
+    background:linear-gradient(90deg,var(--coral),var(--grape),var(--sky));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    letter-spacing:1px;
+  }
+  header p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:0.92rem;
+    font-weight:600;
+  }
+  .progress-wrap{
+    margin:16px auto 0;
+    max-width:340px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .progress-track{
+    flex:1;
+    height:14px;
+    background:#ffffffaa;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--leaf),var(--sky));
+    border-radius:20px;
+    transition:width .5s ease;
+  }
+  .progress-label{
+    font-size:0.78rem;
+    font-weight:700;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  /* ---------- Grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    padding:18px 16px 8px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  @media (min-width:520px){
+    .grid{grid-template-columns:repeat(6,1fr);}
+  }
+  .letter-btn{
+    position:relative;
+    aspect-ratio:1/1;
+    border:none;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Lalezar',cursive;
+    font-size:1.9rem;
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 5px 0 rgba(0,0,0,0.12), 0 6px 10px rgba(0,0,0,0.10);
+    transition:transform .12s ease;
+  }
+  .letter-btn:active{
+    transform:translateY(3px) scale(0.96);
+    box-shadow:0 2px 0 rgba(0,0,0,0.12);
+  }
+  .letter-btn.visited{
+    background:var(--leaf) !important;
+    box-shadow:0 5px 0 rgba(0,0,0,0.12), 0 0 0 3px #ffffff inset, 0 6px 10px rgba(0,0,0,0.10);
+  }
+  .badge{
+    position:absolute;
+    top:-6px;
+    left:-6px;
+    background:#fff;
+    color:var(--leaf);
+    border-radius:50%;
+    width:22px;
+    height:22px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 4px rgba(0,0,0,0.18);
+    font-weight:800;
+  }
+
+  /* ---------- Overlay ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(20,15,30,0.5);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:50;
+  }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .panel{
+    background:var(--card);
+    width:100%;
+    max-width:480px;
+    max-height:90vh;
+    overflow-y:auto;
+    border-radius:28px 28px 0 0;
+    padding:20px 18px 28px;
+    transform:translateY(30px);
+    transition:transform .3s ease;
+    position:relative;
+  }
+  .overlay.open .panel{transform:translateY(0);}
+
+  .close-btn{
+    position:absolute;
+    top:14px;
+    left:14px;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:none;
+    background:#f1f1f5;
+    color:var(--ink-soft);
+    font-size:1.1rem;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .hero-letter-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin-top:6px;
+  }
+  .hero-letter{
+    font-family:'Lalezar',cursive;
+    font-size:4.2rem;
+    line-height:1;
+  }
+  .hero-info{text-align:right;}
+  .hero-name{font-weight:800; font-size:1.15rem;}
+  .speak-btn{
+    margin-top:6px;
+    border:none;
+    background:#F1F1F5;
+    color:var(--ink);
+    border-radius:20px;
+    padding:6px 14px;
+    font-family:'Cairo';
+    font-weight:700;
+    font-size:0.8rem;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .speak-btn:active{transform:scale(0.95);}
+
+  .shapes-title, .examples-title{
+    text-align:center;
+    font-weight:800;
+    font-size:0.95rem;
+    color:var(--ink-soft);
+    margin:22px 0 10px;
+  }
+  .shapes-row{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .shape-chip{
+    background:#F7F7FB;
+    border-radius:16px;
+    padding:10px 6px 8px;
+    width:74px;
+    text-align:center;
+  }
+  .shape-chip .glyph{
+    font-family:'Lalezar',cursive;
+    font-size:1.7rem;
+    display:block;
+  }
+  .shape-chip .lbl{
+    font-size:0.68rem;
+    color:var(--ink-soft);
+    font-weight:700;
+    margin-top:2px;
+    display:block;
+  }
+
+  .example-card{
+    background:#F7F7FB;
+    border-radius:20px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    transition:background .2s ease, box-shadow .2s ease, transform .15s ease;
+  }
+  .example-card:active{transform:scale(0.98);}
+  .example-card.flash{
+    animation:cardGlow 0.7s ease;
+  }
+  @keyframes cardGlow{
+    0%{ background:#F7F7FB; box-shadow:0 0 0 rgba(0,0,0,0); }
+    30%{ background:#FFF3C4; box-shadow:0 0 0 4px #FFD54F55; }
+    100%{ background:#F7F7FB; box-shadow:0 0 0 rgba(0,0,0,0); }
+  }
+  .example-emoji{font-size:2.1rem; flex-shrink:0;}
+  .example-mid{flex:1;}
+  .example-pill{
+    display:inline-block;
+    font-size:0.68rem;
+    font-weight:800;
+    color:#fff;
+    padding:2px 10px;
+    border-radius:12px;
+    margin-bottom:4px;
+  }
+  .example-word{
+    font-family:'Lalezar',cursive;
+    font-size:1.7rem;
+  }
+  .example-word .hl{
+    text-decoration:underline;
+    text-decoration-thickness:3px;
+    text-underline-offset:4px;
+  }
+  .example-speak{
+    border:none;
+    background:#fff;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    font-size:0.95rem;
+    cursor:pointer;
+    flex-shrink:0;
+    box-shadow:0 2px 4px rgba(0,0,0,0.08);
+  }
+
+  .nav-row{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+  }
+  .nav-btn{
+    flex:1;
+    border:none;
+    border-radius:16px;
+    padding:13px 8px;
+    font-family:'Cairo';
+    font-weight:800;
+    font-size:0.9rem;
+    color:#fff;
+    background:linear-gradient(90deg,var(--sky),var(--grape));
+    cursor:pointer;
+  }
+  .nav-btn:active{transform:scale(0.97);}
+
+  /* ---------- Celebration ---------- */
+  .celebrate{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:rgba(20,15,30,0.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+  }
+  .celebrate.open{opacity:1; pointer-events:auto;}
+  .celebrate-card{
+    background:#fff;
+    border-radius:26px;
+    padding:32px 26px;
+    text-align:center;
+    max-width:300px;
+    position:relative;
+    z-index:2;
+  }
+  .celebrate-card h2{
+    font-family:'Lalezar',cursive;
+    font-size:1.7rem;
+    margin:8px 0;
+    color:var(--coral);
+  }
+  .celebrate-card p{color:var(--ink-soft); font-weight:600; font-size:0.9rem;}
+  .celebrate-btn{
+    margin-top:14px;
+    border:none;
+    background:var(--leaf);
+    color:#fff;
+    font-family:'Cairo';
+    font-weight:800;
+    padding:10px 22px;
+    border-radius:16px;
+    cursor:pointer;
+  }
+  .confetti-piece{
+    position:fixed;
+    top:-40px;
+    font-size:1.6rem;
+    z-index:1;
+    animation-name:fall;
+    animation-timing-function:linear;
+    animation-fill-mode:forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(110vh) rotate(360deg); opacity:0.2; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="mascot">🌟</span>
+  <h1 class="display">مغامرة الحروف</h1>
+  <p>اضغط على أي حرف لتكتشف أشكاله الثلاثة!</p>
+  <div class="progress-wrap">
+    <span class="progress-label" id="progressLabel">٠ / ٢٨</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span style="font-size:1.1rem;">⭐</span>
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <button class="close-btn" id="closeBtn">✕</button>
+
+    <div class="hero-letter-row">
+      <button class="speak-btn" id="speakLetterBtn">🔊 استمع</button>
+      <div class="hero-letter" id="heroLetter"></div>
+      <div class="hero-info">
+        <div class="hero-name" id="heroName"></div>
+        <div style="font-size:0.78rem; color:var(--ink-soft); font-weight:700;">حرف من حروف اللغة العربية</div>
+      </div>
+    </div>
+
+    <div class="shapes-title">أشكال الحرف</div>
+    <div class="shapes-row" id="shapesRow"></div>
+
+    <div class="examples-title">موضع الحرف في الكلمة</div>
+    <div id="examplesWrap"></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="nextBtn">الحرف التالي ⟸</button>
+      <button class="nav-btn" id="prevBtn">⟹ الحرف السابق</button>
+    </div>
+  </div>
+</div>
+
+<div class="celebrate" id="celebrate">
+  <div class="celebrate-card">
+    <div style="font-size:2.4rem;">🏆</div>
+    <h2>أحسنت يا بطل!</h2>
+    <p>لقد تعرّفت على أشكال جميع حروف اللغة العربية الـ ٢٨!</p>
+    <button class="celebrate-btn" id="celebrateClose">رائع! 🎉</button>
+  </div>
+</div>
+
+<script>
+const COLORS = ['coral','sun','leaf','sky','grape','melon'];
+
+const LETTERS = [
+  {ch:'ا', name:'ألف', namesp:'أَلِف', ex:[
+    {w:'أسد', sp:'أَسَد', t:0, e:'🦁', lbl:'أول الكلمة'},
+    {w:'سماء', sp:'سَمَاء', t:2, e:'☁️', lbl:'وسط الكلمة'},
+    {w:'عصا', sp:'عَصَا', t:2, e:'🦯', lbl:'آخر الكلمة'}]},
+  {ch:'ب', name:'باء', ex:[
+    {w:'بطة', sp:'بَطَّة', t:0, e:'🦆', lbl:'أول الكلمة'},
+    {w:'قبعة', sp:'قُبَّعَة', t:1, e:'🎩', lbl:'وسط الكلمة'},
+    {w:'كتاب', sp:'كِتَاب', t:3, e:'📖', lbl:'آخر الكلمة'}]},
+  {ch:'ت', name:'تاء', ex:[
+    {w:'تفاح', sp:'تُفَّاح', t:0, e:'🍎', lbl:'أول الكلمة'},
+    {w:'كتاب', sp:'كِتَاب', t:1, e:'📖', lbl:'وسط الكلمة'},
+    {w:'بيت', sp:'بَيْت', t:2, e:'🏠', lbl:'آخر الكلمة'}]},
+  {ch:'ث', name:'ثاء', ex:[
+    {w:'ثعلب', sp:'ثَعْلَب', t:0, e:'🦊', lbl:'أول الكلمة'},
+    {w:'مثلج', sp:'مُثَّلَج', t:1, e:'🍦', lbl:'وسط الكلمة'},
+    {w:'حديث', sp:'حَدِيث', t:3, e:'💬', lbl:'آخر الكلمة'}]},
+  {ch:'ج', name:'جيم', ex:[
+    {w:'جمل', sp:'جَمَل', t:0, e:'🐫', lbl:'أول الكلمة'},
+    {w:'نجم', sp:'نَجْم', t:1, e:'⭐', lbl:'وسط الكلمة'},
+    {w:'ثلج', sp:'ثَلْج', t:2, e:'❄️', lbl:'آخر الكلمة'}]},
+  {ch:'ح', name:'حاء', ex:[
+    {w:'حصان', sp:'حِصَان', t:0, e:'🐴', lbl:'أول الكلمة'},
+    {w:'نحلة', sp:'نَحْلة', t:1, e:'🐝', lbl:'وسط الكلمة'},
+    {w:'تفاح', sp:'تُفَّاح', t:3, e:'🍎', lbl:'آخر الكلمة'}]},
+  {ch:'خ', name:'خاء', ex:[
+    {w:'خروف', sp:'خَرُوف', t:0, e:'🐑', lbl:'أول الكلمة'},
+    {w:'أخضر', sp:'أَخْضَر', t:1, e:'🟢', lbl:'وسط الكلمة'},
+    {w:'بطيخ', sp:'بَطِّيخ', t:3, e:'🍉', lbl:'آخر الكلمة'}]},
+  {ch:'د', name:'دال', ex:[
+    {w:'دجاجة', sp:'دَجَاجة', t:0, e:'🐔', lbl:'أول الكلمة'},
+    {w:'مدرسة', sp:'مَدْرَسة', t:1, e:'🏫', lbl:'وسط الكلمة'},
+    {w:'يد', sp:'يَد', t:1, e:'✋', lbl:'آخر الكلمة'}]},
+  {ch:'ذ', name:'ذال', ex:[
+    {w:'ذئب', sp:'ذِئْب', t:0, e:'🐺', lbl:'أول الكلمة'},
+    {w:'نافذة', sp:'نَافِذة', t:3, e:'🪟', lbl:'وسط الكلمة'},
+    {w:'تلميذ', sp:'تِلْمِيذ', t:4, e:'🎒', lbl:'آخر الكلمة'}]},
+  {ch:'ر', name:'راء', ex:[
+    {w:'رمان', sp:'رُمَّان', t:0, e:'🔴', lbl:'أول الكلمة'},
+    {w:'قرد', sp:'قِرْد', t:1, e:'🐒', lbl:'وسط الكلمة'},
+    {w:'قمر', sp:'قَمَر', t:2, e:'🌙', lbl:'آخر الكلمة'}]},
+  {ch:'ز', name:'زاي', ex:[
+    {w:'زرافة', sp:'زَرَافة', t:0, e:'🦒', lbl:'أول الكلمة'},
+    {w:'مزرعة', sp:'مَزْرَعة', t:1, e:'🚜', lbl:'وسط الكلمة'},
+    {w:'موز', sp:'مَوْز', t:2, e:'🍌', lbl:'آخر الكلمة'}]},
+  {ch:'س', name:'سين', ex:[
+    {w:'سمكة', sp:'سَمَكة', t:0, e:'🐟', lbl:'أول الكلمة'},
+    {w:'مسجد', sp:'مَسْجِد', t:1, e:'🕌', lbl:'وسط الكلمة'},
+    {w:'شمس', sp:'شَمْس', t:2, e:'☀️', lbl:'آخر الكلمة'}]},
+  {ch:'ش', name:'شين', ex:[
+    {w:'شمس', sp:'شَمْس', t:0, e:'☀️', lbl:'أول الكلمة'},
+    {w:'مشط', sp:'مِشْط', t:1, e:'💇', lbl:'وسط الكلمة'},
+    {w:'فراش', sp:'فِرَاش', t:3, e:'🛏️', lbl:'آخر الكلمة'}]},
+  {ch:'ص', name:'صاد', ex:[
+    {w:'صقر', sp:'صَقْر', t:0, e:'🦅', lbl:'أول الكلمة'},
+    {w:'قصة', sp:'قِصَّة', t:1, e:'📖', lbl:'وسط الكلمة'},
+    {w:'قميص', sp:'قَمِيص', t:3, e:'👕', lbl:'آخر الكلمة'}]},
+  {ch:'ض', name:'ضاد', ex:[
+    {w:'ضفدع', sp:'ضِفْدَع', t:0, e:'🐸', lbl:'أول الكلمة'},
+    {w:'خضار', sp:'خُضَار', t:1, e:'🥦', lbl:'وسط الكلمة'},
+    {w:'بيض', sp:'بَيْض', t:2, e:'🥚', lbl:'آخر الكلمة'}]},
+  {ch:'ط', name:'طاء', ex:[
+    {w:'طائرة', sp:'طَائِرة', t:0, e:'✈️', lbl:'أول الكلمة'},
+    {w:'بطة', sp:'بَطَّة', t:1, e:'🦆', lbl:'وسط الكلمة'},
+    {w:'خيط', sp:'خَيْط', t:2, e:'🧵', lbl:'آخر الكلمة'}]},
+  {ch:'ظ', name:'ظاء', ex:[
+    {w:'ظرف', sp:'ظَرْف', t:0, e:'✉️', lbl:'أول الكلمة'},
+    {w:'نظارة', sp:'نَظَّارة', t:1, e:'👓', lbl:'وسط الكلمة'},
+    {w:'حفظ', sp:'حِفْظ', t:2, e:'🧠', lbl:'آخر الكلمة'}]},
+  {ch:'ع', name:'عين', ex:[
+    {w:'عصفور', sp:'عُصْفُور', t:0, e:'🐦', lbl:'أول الكلمة'},
+    {w:'نعامة', sp:'نَعَامة', t:1, e:'🦤', lbl:'وسط الكلمة'},
+    {w:'شارع', sp:'شَارِع', t:3, e:'🛣️', lbl:'آخر الكلمة'}]},
+  {ch:'غ', name:'غين', ex:[
+    {w:'غزال', sp:'غَزَال', t:0, e:'🦌', lbl:'أول الكلمة'},
+    {w:'صغير', sp:'صَغِير', t:1, e:'🤏', lbl:'وسط الكلمة'},
+    {w:'دماغ', sp:'دِمَاغ', t:3, e:'🧠', lbl:'آخر الكلمة'}]},
+  {ch:'ف', name:'فاء', ex:[
+    {w:'فيل', sp:'فِيل', t:0, e:'🐘', lbl:'أول الكلمة'},
+    {w:'تفاحة', sp:'تُفَّاحة', t:1, e:'🍎', lbl:'وسط الكلمة'},
+    {w:'خروف', sp:'خَرُوف', t:3, e:'🐑', lbl:'آخر الكلمة'}]},
+  {ch:'ق', name:'قاف', ex:[
+    {w:'قطة', sp:'قِطَّة', t:0, e:'🐱', lbl:'أول الكلمة'},
+    {w:'بقرة', sp:'بَقَرة', t:1, e:'🐄', lbl:'وسط الكلمة'},
+    {w:'صندوق', sp:'صُنْدُوق', t:4, e:'📦', lbl:'آخر الكلمة'}]},
+  {ch:'ك', name:'كاف', ex:[
+    {w:'كتاب', sp:'كِتَاب', t:0, e:'📖', lbl:'أول الكلمة'},
+    {w:'سكر', sp:'سُكَّر', t:1, e:'🍬', lbl:'وسط الكلمة'},
+    {w:'سمك', sp:'سَمَك', t:2, e:'🐟', lbl:'آخر الكلمة'}]},
+  {ch:'ل', name:'لام', ex:[
+    {w:'ليمون', sp:'لَيْمُون', t:0, e:'🍋', lbl:'أول الكلمة'},
+    {w:'قلم', sp:'قَلَم', t:1, e:'✏️', lbl:'وسط الكلمة'},
+    {w:'جمل', sp:'جَمَل', t:2, e:'🐫', lbl:'آخر الكلمة'}]},
+  {ch:'م', name:'ميم', ex:[
+    {w:'موز', sp:'مَوْز', t:0, e:'🍌', lbl:'أول الكلمة'},
+    {w:'قمر', sp:'قَمَر', t:1, e:'🌙', lbl:'وسط الكلمة'},
+    {w:'قلم', sp:'قَلَم', t:2, e:'✏️', lbl:'آخر الكلمة'}]},
+  {ch:'ن', name:'نون', ex:[
+    {w:'نجمة', sp:'نَجْمة', t:0, e:'⭐', lbl:'أول الكلمة'},
+    {w:'بنت', sp:'بِنْت', t:1, e:'👧', lbl:'وسط الكلمة'},
+    {w:'لبن', sp:'لَبَن', t:2, e:'🥛', lbl:'آخر الكلمة'}]},
+  {ch:'ه', name:'هاء', ex:[
+    {w:'هدهد', sp:'هُدْهُد', t:0, e:'🐦', lbl:'أول الكلمة'},
+    {w:'شهد', sp:'شَهْد', t:1, e:'🍯', lbl:'وسط الكلمة'},
+    {w:'وجه', sp:'وَجْه', t:2, e:'😊', lbl:'آخر الكلمة'}]},
+  {ch:'و', name:'واو', ex:[
+    {w:'وردة', sp:'وَرْدة', t:0, e:'🌹', lbl:'أول الكلمة'},
+    {w:'نور', sp:'نُور', t:1, e:'💡', lbl:'وسط الكلمة'},
+    {w:'دلو', sp:'دَلْو', t:2, e:'🪣', lbl:'آخر الكلمة'}]},
+  {ch:'ي', name:'ياء', ex:[
+    {w:'يد', sp:'يَد', t:0, e:'✋', lbl:'أول الكلمة'},
+    {w:'بيت', sp:'بَيْت', t:1, e:'🏠', lbl:'وسط الكلمة'},
+    {w:'كرسي', sp:'كُرْسِي', t:3, e:'🪑', lbl:'آخر الكلمة'}]}
+];
+
+const visited = new Set();
+let currentIndex = 0;
+let celebrated = false;
+
+const ARABIC_DIGITS = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+function toArabicNum(n){
+  return String(n).split('').map(d => ARABIC_DIGITS[+d]).join('');
+}
+
+let voicesReady = false;
+let audioWarned = false;
+
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = () => { voicesReady = true; };
+  // بعض المتصفحات تحتاج نداء أول لتحميل الأصوات
+  window.speechSynthesis.getVoices();
+}
+
+function showAudioHint(){
+  if(audioWarned) return;
+  audioWarned = true;
+  const hint = document.createElement('div');
+  hint.textContent = '🔇 هذا الجهاز/المتصفح لا يدعم النطق الصوتي حاليًا';
+  hint.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2B2B3A;color:#fff;padding:10px 16px;border-radius:14px;font-size:0.8rem;font-weight:700;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.25);max-width:85vw;text-align:center;';
+  document.body.appendChild(hint);
+  setTimeout(() => hint.remove(), 3500);
+}
+
+function withSukoon(text){
+  // إضافة سكون على آخر حرف يمنع محرك النطق من افتراض حركة إعراب (تنوين) تلقائية
+  return text + '\u0652';
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)){
+    showAudioHint();
+    return;
+  }
+  const synth = window.speechSynthesis;
+
+  const doSpeak = () => {
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const voices = synth.getVoices();
+    const arVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ar'));
+    if(arVoice) u.voice = arVoice;
+    u.lang = arVoice ? arVoice.lang : 'ar-SA';
+    u.rate = 0.85;
+    let spoke = false;
+    u.onstart = () => { spoke = true; };
+    u.onerror = () => { if(!spoke) showAudioHint(); };
+    synth.speak(u);
+    setTimeout(() => { if(!spoke && synth.speaking === false) showAudioHint(); }, 700);
+  };
+
+  const voices = synth.getVoices();
+  if(voices.length === 0 && !voicesReady){
+    setTimeout(doSpeak, 250);
+  } else {
+    doSpeak();
+  }
+}
+
+const grid = document.getElementById('grid');
+LETTERS.forEach((L, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'letter-btn';
+  btn.style.background = `var(--${COLORS[i % COLORS.length]})`;
+  btn.innerHTML = L.ch + '<span class="badge" style="display:none">✓</span>';
+  btn.addEventListener('click', () => openLetter(i));
+  grid.appendChild(btn);
+});
+
+function updateProgress(){
+  const pct = (visited.size / LETTERS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent =
+    toArabicNum(visited.size) + ' / ' + toArabicNum(LETTERS.length);
+
+  [...grid.children].forEach((btn, i) => {
+    const isVisited = visited.has(i);
+    btn.querySelector('.badge').style.display = isVisited ? 'flex' : 'none';
+    btn.classList.toggle('visited', isVisited);
+  });
+
+  if(visited.size === LETTERS.length && !celebrated){
+    celebrated = true;
+    setTimeout(showCelebration, 400);
+  }
+}
+
+function buildShapeChip(glyph, label){
+  const div = document.createElement('div');
+  div.className = 'shape-chip';
+  div.innerHTML = `<span class="glyph">${glyph}</span><span class="lbl">${label}</span>`;
+  return div;
+}
+
+function openLetter(i){
+  currentIndex = i;
+  const L = LETTERS[i];
+  const color = COLORS[i % COLORS.length];
+
+  document.getElementById('heroLetter').textContent = L.ch;
+  document.getElementById('heroLetter').style.color = `var(--${color})`;
+  document.getElementById('heroName').textContent = L.name;
+
+  const shapesRow = document.getElementById('shapesRow');
+  shapesRow.innerHTML = '';
+  shapesRow.appendChild(buildShapeChip(L.ch, 'منفرد'));
+  shapesRow.appendChild(buildShapeChip(L.ch + 'ـ', 'أول الكلمة'));
+  shapesRow.appendChild(buildShapeChip('ـ' + L.ch + 'ـ', 'وسط الكلمة'));
+  shapesRow.appendChild(buildShapeChip('ـ' + L.ch, 'آخر الكلمة'));
+
+  const wrap = document.getElementById('examplesWrap');
+  wrap.innerHTML = '';
+  L.ex.forEach(ex => {
+    const chars = [...ex.w];
+    const wordHtml = chars.map((c, idx) =>
+      idx === ex.t ? `<span class="hl" style="color:var(--${color})">${c}</span>` : c
+    ).join('');
+
+    const card = document.createElement('div');
+    card.className = 'example-card';
+    card.innerHTML = `
+      <button class="example-speak">🔊</button>
+      <div class="example-mid">
+        <span class="example-pill" style="background:var(--${color})">${ex.lbl}</span>
+        <div class="example-word">${wordHtml}</div>
+      </div>
+      <div class="example-emoji">${ex.e}</div>
+    `;
+    card.querySelector('.example-speak').addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      speak(withSukoon(ex.sp || ex.w));
+    });
+    card.addEventListener('click', () => {
+      speak(withSukoon(ex.sp || ex.w));
+      card.classList.remove('flash');
+      void card.offsetWidth;
+      card.classList.add('flash');
+    });
+    wrap.appendChild(card);
+  });
+
+  document.getElementById('speakLetterBtn').onclick = () => speak(withSukoon(L.namesp || L.name));
+
+  visited.add(i);
+  updateProgress();
+
+  document.getElementById('overlay').classList.add('open');
+}
+
+document.getElementById('closeBtn').addEventListener('click', () => {
+  document.getElementById('overlay').classList.remove('open');
+  speechSynthesis && speechSynthesis.cancel();
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  openLetter((currentIndex + 1) % LETTERS.length);
+});
+document.getElementById('prevBtn').addEventListener('click', () => {
+  openLetter((currentIndex - 1 + LETTERS.length) % LETTERS.length);
+});
+
+function showCelebration(){
+  const cel = document.getElementById('celebrate');
+  cel.classList.add('open');
+  const emojis = ['🎉','⭐','🎊','🌟','🏅'];
+  for(let k = 0; k < 26; k++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.textContent = emojis[k % emojis.length];
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
+    piece.style.animationDelay = (Math.random() * 0.6) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 4500);
+  }
+}
+document.getElementById('celebrateClose').addEventListener('click', () => {
+  document.getElementById('celebrate').classList.remove('open');
+});
+
+updateProgress();
+</script>
+</body>
+</html>
